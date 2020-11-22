@@ -4,10 +4,14 @@ const refs = {
   galleryItem: document.querySelector(".gallery__item"),
   gallery: document.querySelector(".js-gallery"),
   modalInput: document.querySelector(".lightbox"),
-  largeImage: document.querySelector(".lightbox-image"),
+  backdropRef: document.querySelector(".lightbox__overlay"),
+  largeImage: document.querySelector("img[class='lightbox__image']"),
+  backmodal: document.querySelector(".lightbox__button"),
 };
+refs.gallery.addEventListener("click", onGalleryClick);
 
 const array = [...galleryItems];
+/*Создаем галлерею*/
 const elementGalleryRef = (array) =>
   array.forEach((element) => {
     /* создаем img класса gallery__image */
@@ -24,31 +28,54 @@ const elementGalleryRef = (array) =>
     /* создаем єлемент li    */
     const list = document.createElement("li");
     list.classList.add("gallery__item");
-    console.log(list);
     list.appendChild(link);
     refs.gallery.append(list);
   });
 elementGalleryRef(array);
-/* кликаем на галлерею*/
-refs.gallery.addEventListener("click", onGalleryClick);
-
+/* кликаем на галлерею и переходим в модальное окно*/
 function onGalleryClick(event) {
   event.preventDefault();
+  refs.backmodal.addEventListener("click", onBackModalClick);
+  refs.backdropRef.addEventListener("click", onBackModalClick);
+  window.addEventListener("keydown", onPressEscape);
 
   if (event.target.nodeName !== "IMG") {
     return;
   }
   const imageRef = event.target;
   const largeImageURL = imageRef.dataset.source;
-  console.log(largeImageURL);
   setLargeImageSrc(largeImageURL);
 
-  /*обавляем класс на div[class=lightbox*/
+  /*добавляем класс на div[class=lightbox*/
   const modalOn = refs.modalInput;
   modalOn.classList.add("is-open");
-  console.log(refs.modalInput);
 }
+/* Функция ссылки на большой рисунок */
 function setLargeImageSrc(url) {
-  console.dir(refs.target);
-  refs.gallery__image.src = url;
+  const refmodal = refs.largeImage;
+  refmodal.src = url;
+}
+function onCloseModal() {
+  window.removeEventListener("keydown", onPressEscape);
+  refs.backmodal.removeEventListener("click", onBackModalClick);
+  refs.backdropRef.removeEventListener("click", onBackModalClick);
+  refs.modalInput.classList.remove("is-open");
+  getLargeImageSrc();
+}
+/* Функция очистки ссылки на большой рисунок */
+function getLargeImageSrc() {
+  const refmodal = refs.largeImage;
+  refmodal.src = "";
+}
+/* Функция 'клика на кнопку закрытия или оверлей*/
+function onBackModalClick(event) {
+  if (event.target === event.currentTarget) {
+    onCloseModal();
+  }
+}
+/* Функция нажатия ESC*/
+function onPressEscape(event) {
+  if (event.code === "Escape") {
+    onCloseModal();
+  }
 }
